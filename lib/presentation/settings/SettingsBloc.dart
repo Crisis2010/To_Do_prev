@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:todo_app/Delegators.dart';
 import 'package:todo_app/Localization.dart';
-//import 'package:todo_app/Secrets.dart';
+import 'package:todo_app/Secrets.dart';
 import 'package:todo_app/Utils.dart';
 import 'package:todo_app/domain/usecase/SettingsUsecases.dart';
 import 'package:todo_app/presentation/App.dart';
@@ -41,7 +41,6 @@ class SettingsBloc {
   Future<void> onUseLockScreenChanged(BuildContext context) async {
     final useLockScreen = await _usecases.getUseLockScreen();
     final userPassword = await _usecases.getUserPassword();
-
     if (useLockScreen && userPassword.isEmpty) {
       _usecases.setUseLockScreen(false);
       _showCreatePasswordDialog(context);
@@ -126,7 +125,7 @@ class SettingsBloc {
       final response = await http.post(
         _SENDGRID_SEND_API_ENDPOINT,
         headers: {
-          HttpHeaders.authorizationHeader: '',
+          HttpHeaders.authorizationHeader: SENDGRID_AUTHORIZATION,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: body,
@@ -151,7 +150,7 @@ class SettingsBloc {
     @required String title,
     @required String body,
   }) {
-    return '{"personalizations":[{"to":[{"email":"$targetEmail"}],"subject":"$title"}],"content": [{"type": "text/plain", "value": "$body"}],"from":{"email":"giantsol64@gmail.com","name":"Blue Diary Developer"}}';
+    return '{"personalizations":[{"to":[{"email":"$targetEmail"}],"subject":"$title"}],"content": [{"type": "text/plain", "value": "$body"}],"from":{"email":"skutigor@yandex.ru","name":"ToDo developers"}}';
   }
 
   Future<void> onResetPasswordClicked(BuildContext context) async {

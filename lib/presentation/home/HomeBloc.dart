@@ -51,7 +51,6 @@ class HomeBloc {
       childScreenItems: navigationItems,
       currentChildScreenKey: currentChildScreenKey,
     ));
-
     for (var listener in _bottomNavigationItemClickedListeners) {
       listener(key);
     }

@@ -12,7 +12,6 @@ import 'package:todo_app/domain/entity/ToDoRecord.dart';
 import 'package:todo_app/domain/usecase/DayUsecases.dart';
 import 'package:todo_app/presentation/App.dart';
 import 'package:todo_app/presentation/day/DayState.dart';
-
 class DayBloc {
   static const _oneDay = const Duration(days: 1);
 

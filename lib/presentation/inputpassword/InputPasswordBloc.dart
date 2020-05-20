@@ -39,7 +39,6 @@ class InputPasswordBloc {
     if (updatedPassword.length == 4) {
       _state.add(_state.value.buildNew(
         password: updatedPassword,
-        isLoading: true,
       ));
       final savedPassword = await _usecases.getUserPassword();
       if (updatedPassword == savedPassword) {
@@ -53,12 +52,11 @@ class InputPasswordBloc {
           Navigator.pop(context);
           if (onFail != null) {
             onFail();
-          }
+        }
         } else {
           _state.add(_state.value.buildNew(
             password: '',
             failCount: updatedFailCount,
-            isLoading: false,
           ));
         }
       }

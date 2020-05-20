@@ -23,7 +23,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Blue Diary',
+      title: 'ToDo',
       theme: ThemeData(
         canvasColor: AppColors.BACKGROUND_WHITE,
         primaryColor: AppColors.PRIMARY,
@@ -31,7 +31,6 @@ class App extends StatelessWidget {
         primaryColorDark: AppColors.PRIMARY_DARK,
         accentColor: AppColors.SECONDARY,
         splashColor: AppColors.RIPPLE,
-
         textTheme: TextTheme(
           subhead: TextStyle(
             textBaseline: TextBaseline.alphabetic
@@ -45,10 +44,10 @@ class App extends StatelessWidget {
       ],
       supportedLocales: [
         const Locale('en'),
-        const Locale('ko'),
-      ],
+        ],
       builder: (context, widget) {
-        if (kReleaseMode) {
+        // do NOT show red error screen in production build although there's an error
+        if (kReleaseMode || kDebugMode) {
           ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
             return Container();
           };

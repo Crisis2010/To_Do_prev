@@ -113,7 +113,6 @@ class DayState {
       currentDate: currentDate ?? this.currentDate,
       inputPassword: inputPassword ?? this.inputPassword,
 
-      // these are one-time events, so default to false if not given to "true" as parameter
       scrollToBottomEvent: scrollToBottomEvent ?? false,
       scrollToToDoListEvent: scrollToToDoListEvent ?? false,
       animateToPageEvent: animateToPageEvent ?? -1,
