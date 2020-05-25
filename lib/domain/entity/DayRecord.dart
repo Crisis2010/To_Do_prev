@@ -1,4 +1,3 @@
-
 import 'package:todo_app/domain/entity/DayMemo.dart';
 import 'package:todo_app/domain/entity/ToDoRecord.dart';
 
@@ -13,11 +12,7 @@ class DayRecord {
     this.isToday = false,
   });
 
-  DayRecord buildNew({
-    List<ToDoRecord> toDoRecords,
-    DayMemo dayMemo,
-    bool isToday,
-  }) {
+  DayRecord buildNew({List<ToDoRecord> toDoRecords, DayMemo dayMemo, bool isToday}) {
     return DayRecord(
       toDoRecords: toDoRecords ?? this.toDoRecords,
       dayMemo: dayMemo ?? this.dayMemo,
