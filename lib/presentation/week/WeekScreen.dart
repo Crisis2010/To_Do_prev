@@ -1,4 +1,3 @@
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -63,12 +62,11 @@ class _WeekScreenState extends State<WeekScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      initialData: _bloc.getInitialState(),
-      stream: _bloc.observeState(),
-      builder: (context, snapshot) {
-        return _buildUI(snapshot.data);
-      }
-    );
+        initialData: _bloc.getInitialState(),
+        stream: _bloc.observeState(),
+        builder: (context, snapshot) {
+          return _buildUI(snapshot.data);
+        });
   }
 
   Widget _buildUI(WeekState state) {
@@ -80,62 +78,62 @@ class _WeekScreenState extends State<WeekScreen> {
 
     if (state.animateToPageEvent != -1) {
       SchedulerBinding.instance.addPostFrameCallback((duration) {
-        _pageController.animateToPage(state.animateToPageEvent,
+        _pageController.animateToPage(
+          state.animateToPageEvent,
           duration: const Duration(milliseconds: 400),
           curve: Curves.ease,
         );
       });
     }
 
-    return state.viewState == WeekViewState.WHOLE_LOADING ? _WholeLoadingView()
-      : WillPopScope(
-      onWillPop: () async {
-        return !_unfocusTextFieldIfAny();
-      },
-      child: Column(
-        children: [
-          _Header(
-            bloc: _bloc,
-            displayYear: state.year.toString(),
-            displayMonthAndWeek: AppLocalizations.of(context).getMonthAndNthWeek(state.month, state.nthWeek),
-          ),
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                PageView.builder(
-                  controller: _pageController,
-                  itemCount: WeekScreen.MAX_WEEK_PAGE,
-                  itemBuilder: (context, index) {
-                    final weekRecord = state.getWeekRecordForPageIndex(index);
-                    if (weekRecord == null) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      return _WeekRecord(
-                        bloc: _bloc,
-                        weekRecord: weekRecord,
-                        focusNodeProvider: _getOrCreateFocusNode,
-                        scrollController: _scrollController,
-                      );
-                    }
-                  },
-                  onPageChanged: (changedIndex) {
-                    _unfocusTextFieldIfAny();
-                    _headerShadowKey.currentState.updateShadowVisibility(false);
-                    _bloc.onWeekRecordPageIndexChanged(changedIndex);
-                  },
+    return state.viewState == WeekViewState.WHOLE_LOADING
+        ? _WholeLoadingView()
+        : WillPopScope(
+            onWillPop: () async {
+              return !_unfocusTextFieldIfAny();
+            },
+            child: Column(children: [
+              _Header(
+                bloc: _bloc,
+                displayYear: state.year.toString(),
+                displayMonthAndWeek: AppLocalizations.of(context).getMonthAndNthWeek(state.month, state.nthWeek),
+              ),
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    PageView.builder(
+                      controller: _pageController,
+                      itemCount: WeekScreen.MAX_WEEK_PAGE,
+                      itemBuilder: (context, index) {
+                        final weekRecord = state.getWeekRecordForPageIndex(index);
+                        if (weekRecord == null) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return _WeekRecord(
+                            bloc: _bloc,
+                            weekRecord: weekRecord,
+                            focusNodeProvider: _getOrCreateFocusNode,
+                            scrollController: _scrollController,
+                          );
+                        }
+                      },
+                      onPageChanged: (changedIndex) {
+                        _unfocusTextFieldIfAny();
+                        _headerShadowKey.currentState.updateShadowVisibility(false);
+                        _bloc.onWeekRecordPageIndexChanged(changedIndex);
+                      },
+                    ),
+                    _HeaderShadow(
+                      key: _headerShadowKey,
+                      scrollController: _scrollController,
+                    ),
+                  ],
                 ),
-                _HeaderShadow(
-                  key: _headerShadowKey,
-                  scrollController: _scrollController,
-                ),
-              ],
-            ),
-          ),
-        ]
-      ),
-    );
+              ),
+            ]),
+          );
   }
 
   FocusNode _getOrCreateFocusNode(String key) {
@@ -185,8 +183,11 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        SizedBox(width: 4,),
+        SizedBox(
+          width: 4,
+        ),
         InkWell(
+          key: Key('prevWeekBtn'),
           onTap: () => bloc.onPrevArrowClicked(),
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -222,13 +223,16 @@ class _Header extends StatelessWidget {
           ),
         ),
         InkWell(
+          key: Key('nextWeekBtn'),
           onTap: () => bloc.onNextArrowClicked(),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Image.asset('assets/ic_next.png'),
           ),
         ),
-        SizedBox(width: 4,),
+        SizedBox(
+          width: 4,
+        ),
       ],
     );
   }
@@ -261,16 +265,13 @@ class _WeekRecord extends StatelessWidget {
             focusNodeProvider: focusNodeProvider,
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 12,),
-            child: Column(
-              children: List.generate(dayPreviews.length, (index) {
-                return _DayPreviewItem(
-                  bloc: bloc,
-                  weekRecord: weekRecord,
-                  dayPreview: dayPreviews[index]
-                );
-              })
+            padding: const EdgeInsets.only(
+              top: 12,
             ),
+            child: Column(
+                children: List.generate(dayPreviews.length, (index) {
+              return _DayPreviewItem(bloc: bloc, weekRecord: weekRecord, dayPreview: dayPreviews[index]);
+            })),
           ),
         ],
       ),
@@ -304,7 +305,10 @@ class _CheckPointsBox extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 12, top: 12,),
+              padding: const EdgeInsets.only(
+                left: 12,
+                top: 12,
+              ),
               child: Text(
                 'CHECK POINTS',
                 style: TextStyle(
@@ -314,11 +318,17 @@ class _CheckPointsBox extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 8, top: 4, right: 12, bottom: 12,),
+              padding: const EdgeInsets.only(
+                left: 8,
+                top: 4,
+                right: 12,
+                bottom: 12,
+              ),
               child: Column(
                 children: List.generate(checkPoints.length, (index) {
-                  final checkPoint = index == 0 && weekRecord.containsToday ? checkPoints[index].buildNew(hint: AppLocalizations.of(context).checkPointHint)
-                    : checkPoints[index];
+                  final checkPoint = index == 0 && weekRecord.containsToday
+                      ? checkPoints[index].buildNew(hint: AppLocalizations.of(context).checkPointHint)
+                      : checkPoints[index];
                   return _CheckPointItem(
                     bloc: bloc,
                     weekRecord: weekRecord,
@@ -355,21 +365,26 @@ class _CheckPointItem extends StatelessWidget {
       child: Row(
         children: <Widget>[
           ConstrainedBox(
-            constraints: BoxConstraints(minWidth: 20,),
-            child: Center(
-              child: Text(
-                (checkPoint.index + 1).toString(),
-                style: TextStyle(
-                  color: AppColors.TEXT_WHITE_DARK,
-                  fontSize: 16,
-                ),
+              constraints: BoxConstraints(
+                minWidth: 20,
               ),
-            )
+              child: Center(
+                child: Text(
+                  (checkPoint.index + 1).toString(),
+                  style: TextStyle(
+                    color: AppColors.TEXT_WHITE_DARK,
+                    fontSize: 16,
+                  ),
+                ),
+              )),
+          SizedBox(
+            width: 4,
           ),
-          SizedBox(width: 4,),
           Expanded(
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: 38,),
+              constraints: BoxConstraints(
+                minHeight: 38,
+              ),
               child: Container(
                 alignment: Alignment.center,
                 child: AppTextField(
@@ -432,7 +447,11 @@ class _DayPreviewItem extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 14, top: 8, bottom: 8,),
+                  padding: const EdgeInsets.only(
+                    left: 14,
+                    top: 8,
+                    bottom: 8,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,12 +470,16 @@ class _DayPreviewItem extends StatelessWidget {
                           dayPreview.isToday == true ? _DayPreviewItemTodayText() : const SizedBox.shrink(),
                         ],
                       ),
-                      SizedBox(height: 4,),
+                      SizedBox(
+                        height: 4,
+                      ),
                       _DayPreviewItemMemo(
                         isLightColor: isLightColor,
                         memo: dayPreview.memoPreview,
                       ),
-                      SizedBox(height: 4,),
+                      SizedBox(
+                        height: 4,
+                      ),
                       _DayPreviewItemToDos(
                         isLightColor: isLightColor,
                         firstToDo: firstToDo,
@@ -501,40 +524,46 @@ class _DayPreviewItemThumbnail extends StatelessWidget {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: <Widget>[
-        isTopLineVisible ? Align(
-          alignment: Alignment.topCenter,
-          child: ClipRect(
-            child: Align(
-              alignment: Alignment.topCenter,
-              heightFactor: 0.5,
-              child: Container(
-                color: isTopLineLightColor ? AppColors.PRIMARY_LIGHT_LIGHT : AppColors.PRIMARY,
-                width: 2,
-              ),
-            ),
-          ),
-        ) : const SizedBox.shrink(),
-        isBottomLineVisible ? Align(
-          alignment: Alignment.bottomCenter,
-          child: ClipRect(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              heightFactor: 0.5,
-              child: Container(
-                color: isBottomLineLightColor ? AppColors.PRIMARY_LIGHT_LIGHT : AppColors.PRIMARY,
-                width: 2,
-              ),
-            ),
-          ),
-        ) : const SizedBox.shrink(),
+        isTopLineVisible
+            ? Align(
+                alignment: Alignment.topCenter,
+                child: ClipRect(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: 0.5,
+                    child: Container(
+                      color: isTopLineLightColor ? AppColors.PRIMARY_LIGHT_LIGHT : AppColors.PRIMARY,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
+        isBottomLineVisible
+            ? Align(
+                alignment: Alignment.bottomCenter,
+                child: ClipRect(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    heightFactor: 0.5,
+                    child: Container(
+                      color: isBottomLineLightColor ? AppColors.PRIMARY_LIGHT_LIGHT : AppColors.PRIMARY,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
         _ThumbnailCircle(
           color: bgColor,
           ratio: 1.0,
         ),
-        ratio > 0 ? _ThumbnailCircle(
-          color: fgColor,
-          ratio: ratio,
-        ) : const SizedBox.shrink(),
+        ratio > 0
+            ? _ThumbnailCircle(
+                color: fgColor,
+                ratio: ratio,
+              )
+            : const SizedBox.shrink(),
         Center(
           child: Text(
             text,
@@ -607,86 +636,91 @@ class _DayPreviewItemToDos extends StatelessWidget {
       children: <Widget>[
         Image.asset(isLightColor ? 'assets/ic_preview_todo_light.png' : 'assets/ic_preview_todo.png'),
         SizedBox(width: 8),
-        hasNoToDos ? Text(
-          '-',
-          style: TextStyle(
-            fontSize: 12,
-            color: isLightColor || hasNoToDos ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
-          ),
-        ): hasOneToDo ? Expanded(
-          child: Text(
-            firstToDo.text,
-            style: TextStyle(
-              fontSize: 12,
-              color: isLightColor || firstToDo.isDone ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
-              decoration: firstToDo.isDone ? TextDecoration.lineThrough : null,
-              decorationColor: AppColors.TEXT_BLACK_LIGHT,
-              decorationThickness: 2,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ) : Expanded(
-          child: Row(
-            children: <Widget>[
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 70,
-                ),
-                child: Text(
-                  firstToDo.text,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isLightColor || firstToDo.isDone ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
-                    decoration: firstToDo.isDone ? TextDecoration.lineThrough : null,
-                    decorationColor: AppColors.TEXT_BLACK_LIGHT,
-                    decorationThickness: 2,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                ', ',
+        hasNoToDos
+            ? Text(
+                '-',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isLightColor ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
+                  color: isLightColor || hasNoToDos ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
                 ),
-              ),
-              Expanded(
-                child: Row(
-                  children: <Widget>[
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: 70,
+              )
+            : hasOneToDo
+                ? Expanded(
+                    child: Text(
+                      firstToDo.text,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isLightColor || firstToDo.isDone ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
+                        decoration: firstToDo.isDone ? TextDecoration.lineThrough : null,
+                        decorationColor: AppColors.TEXT_BLACK_LIGHT,
+                        decorationThickness: 2,
                       ),
-                      child: Text(
-                        secondToDo.text,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isLightColor || secondToDo.isDone ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
-                          decoration: secondToDo.isDone ? TextDecoration.lineThrough : null,
-                          decorationColor: AppColors.TEXT_BLACK_LIGHT,
-                          decorationThickness: 2,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    moreToDosCount > 0 ? Expanded(
-                      child: Text(
-                        AppLocalizations.of(context).getMoreToDos(moreToDosCount),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.TEXT_BLACK_LIGHT,
+                  )
+                : Expanded(
+                    child: Row(
+                      children: <Widget>[
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: 70,
+                          ),
+                          child: Text(
+                            firstToDo.text,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isLightColor || firstToDo.isDone ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
+                              decoration: firstToDo.isDone ? TextDecoration.lineThrough : null,
+                              decorationColor: AppColors.TEXT_BLACK_LIGHT,
+                              decorationThickness: 2,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.start,
-                      )
-                    ) : const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        )
+                        Text(
+                          ', ',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isLightColor ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
+                          ),
+                        ),
+                        Expanded(
+                          child: Row(
+                            children: <Widget>[
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: 70,
+                                ),
+                                child: Text(
+                                  secondToDo.text,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isLightColor || secondToDo.isDone ? AppColors.TEXT_BLACK_LIGHT : AppColors.TEXT_BLACK,
+                                    decoration: secondToDo.isDone ? TextDecoration.lineThrough : null,
+                                    decorationColor: AppColors.TEXT_BLACK_LIGHT,
+                                    decorationThickness: 2,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              moreToDosCount > 0
+                                  ? Expanded(
+                                      child: Text(
+                                      AppLocalizations.of(context).getMoreToDos(moreToDosCount),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.TEXT_BLACK_LIGHT,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.start,
+                                    ))
+                                  : const SizedBox.shrink(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
       ],
     );
   }
@@ -725,12 +759,11 @@ class _ThumbnailCircle extends StatelessWidget {
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: color,
-                    width: 2,
-                  )
-                ),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: color,
+                      width: 2,
+                    )),
               ),
             ),
           ],
@@ -753,14 +786,8 @@ class _ThumbnailCircleClipper extends CustomClipper<Path> {
     final centerY = size.height / 2;
     final path = Path()
       ..moveTo(centerX, centerY)
-      ..arcTo(
-        Rect.fromCenter(center: Offset(centerX, centerY),
-          width: size.width,
-          height: size.height),
-        _degreesToRadians(-90),
-        _degreesToRadians(360 * ratio),
-        false
-      );
+      ..arcTo(Rect.fromCenter(center: Offset(centerX, centerY), width: size.width, height: size.height), _degreesToRadians(-90),
+          _degreesToRadians(360 * ratio), false);
     path.close();
     return path;
   }
@@ -781,7 +808,10 @@ class _DayPreviewItemTodayText extends StatelessWidget {
         color: AppColors.SECONDARY,
         borderRadius: BorderRadius.all(Radius.circular(6)),
       ),
-      padding: EdgeInsets.symmetric(vertical: 1, horizontal: 3,),
+      padding: EdgeInsets.symmetric(
+        vertical: 1,
+        horizontal: 3,
+      ),
       child: Text(
         'TODAY',
         style: TextStyle(
@@ -800,7 +830,7 @@ class _HeaderShadow extends StatefulWidget {
   _HeaderShadow({
     Key key,
     @required this.scrollController,
-  }): super(key: key);
+  }) : super(key: key);
 
   @override
   State createState() => _HeaderShadowState();
@@ -841,12 +871,8 @@ class _HeaderShadowState extends State<_HeaderShadow> {
       width: double.infinity,
       height: _isShadowVisible ? 6 : 0,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)]
-        )
-      ),
+          gradient: LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)])),
     );
   }
 }
