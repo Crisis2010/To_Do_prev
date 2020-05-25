@@ -22,15 +22,6 @@ void main() {
 
       // assert
       expect(result.runtimeType, record.runtimeType);
-
-      // arrange
-      // when(mockCategoryRepository.getCategory(any)).thenAnswer((_) async => Right(tCategory));
-      // act
-      // final result = await usecase(Params(categoryId: tCategoryId));
-      // assert
-      // expect(result, Right(tCategory));
-      // verify(mockCategoryRepository.getCategory(tCategoryId));
-      // verifyNoMoreInteractions(mockCategoryRepository);
     },
   );
 
