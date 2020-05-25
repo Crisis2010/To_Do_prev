@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -56,12 +55,11 @@ class _DayScreenState extends State<DayScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      initialData: _bloc.getInitialState(),
-      stream: _bloc.observeState(),
-      builder: (context, snapshot) {
-        return _buildUI(snapshot.data);
-      }
-    );
+        initialData: _bloc.getInitialState(),
+        stream: _bloc.observeState(),
+        builder: (context, snapshot) {
+          return _buildUI(snapshot.data);
+        });
   }
 
   Widget _buildUI(DayState state) {
@@ -93,7 +91,8 @@ class _DayScreenState extends State<DayScreen> {
 
     if (state.animateToPageEvent != -1) {
       SchedulerBinding.instance.addPostFrameCallback((duration) {
-        _pageController.animateToPage(state.animateToPageEvent,
+        _pageController.animateToPage(
+          state.animateToPageEvent,
           duration: const Duration(milliseconds: 400),
           curve: Curves.ease,
         );
@@ -102,77 +101,85 @@ class _DayScreenState extends State<DayScreen> {
 
     return SafeArea(
       child: Scaffold(
-        body: state.viewState == DayViewState.WHOLE_LOADING ? _WholeLoadingView()
-          : WillPopScope(
-          onWillPop: () async => !_bloc.handleBackPress() && !_unfocusTextFieldIfAny(),
-          child: Stack(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  _Header(
-                    bloc: _bloc,
-                    title: AppLocalizations.of(context).getDayScreenTitle(state.month, state.day, state.weekday),
-                  ),
-                  Expanded(
-                    child: Stack(
+        body: state.viewState == DayViewState.WHOLE_LOADING
+            ? _WholeLoadingView()
+            : WillPopScope(
+                onWillPop: () async => !_bloc.handleBackPress() && !_unfocusTextFieldIfAny(),
+                child: Stack(
+                  children: <Widget>[
+                    Column(
                       children: <Widget>[
-                        PageView.builder(
-                          controller: _pageController,
-                          itemCount: DayScreen.MAX_DAY_PAGE,
-                          itemBuilder: (context, index) {
-                            final dayRecord = state.getDayRecordForPageIndex(index);
-                            if (dayRecord == null) {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            } else {
-                              return _DayRecord(
-                                bloc: _bloc,
-                                dayRecord: dayRecord,
-                                focusNodeProvider: _getOrCreateFocusNode,
-                                scrollController: _toDoScrollController,
-                                inputPasswordLength: state.inputPassword.length,
-                              );
-                            }
-                          },
-                          onPageChanged: (changedIndex) {
-                            _unfocusTextFieldIfAny();
-                            _headerShadowKey.currentState.updateShadowVisibility(false);
-                            _bloc.onDayRecordPageIndexChanged(changedIndex);
-                          },
+                        _Header(
+                          bloc: _bloc,
+                          title: AppLocalizations.of(context).getDayScreenTitle(state.month, state.day, state.weekday),
                         ),
-                        _HeaderShadow(
-                          key: _headerShadowKey,
-                          scrollController: _toDoScrollController,
+                        Expanded(
+                          child: Stack(
+                            children: <Widget>[
+                              PageView.builder(
+                                controller: _pageController,
+                                itemCount: DayScreen.MAX_DAY_PAGE,
+                                itemBuilder: (context, index) {
+                                  final dayRecord = state.getDayRecordForPageIndex(index);
+                                  if (dayRecord == null) {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  } else {
+                                    return _DayRecord(
+                                      bloc: _bloc,
+                                      dayRecord: dayRecord,
+                                      focusNodeProvider: _getOrCreateFocusNode,
+                                      scrollController: _toDoScrollController,
+                                      inputPasswordLength: state.inputPassword.length,
+                                    );
+                                  }
+                                },
+                                onPageChanged: (changedIndex) {
+                                  _unfocusTextFieldIfAny();
+                                  _headerShadowKey.currentState.updateShadowVisibility(false);
+                                  _bloc.onDayRecordPageIndexChanged(changedIndex);
+                                },
+                              ),
+                              _HeaderShadow(
+                                key: _headerShadowKey,
+                                scrollController: _toDoScrollController,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    // editor positioned just above the keyboard
+                    state.editorState == EditorState.HIDDEN
+                        ? const SizedBox.shrink()
+                        : state.editorState == EditorState.SHOWN_TODO
+                            ? _ToDoEditorContainer(
+                                bloc: _bloc,
+                                editingToDoRecord: state.editingToDoRecord,
+                                focusNodeProvider: _getOrCreateFocusNode,
+                              )
+                            : _CategoryEditorContainer(
+                                bloc: _bloc,
+                                allCategories: state.allCategories,
+                                editingCategory: state.editingCategory,
+                                categoryPickers: state.categoryPickers,
+                                selectedPickerIndex: state.selectedPickerIndex,
+                                focusNodeProvider: _getOrCreateFocusNode,
+                              ),
+                    state.isFabVisible
+                        ? _AddToDoFAB(
+                            bloc: _bloc,
+                          )
+                        : const SizedBox.shrink(),
+                    state.isFabVisible
+                        ? _BackFAB(
+                            bloc: _bloc,
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                ),
               ),
-              // editor positioned just above the keyboard
-              state.editorState == EditorState.HIDDEN ? const SizedBox.shrink()
-                : state.editorState == EditorState.SHOWN_TODO ? _ToDoEditorContainer(
-                bloc: _bloc,
-                editingToDoRecord: state.editingToDoRecord,
-                focusNodeProvider: _getOrCreateFocusNode,
-              ) : _CategoryEditorContainer(
-                bloc: _bloc,
-                allCategories: state.allCategories,
-                editingCategory: state.editingCategory,
-                categoryPickers: state.categoryPickers,
-                selectedPickerIndex: state.selectedPickerIndex,
-                focusNodeProvider: _getOrCreateFocusNode,
-              ),
-              state.isFabVisible ? _AddToDoFAB(
-                bloc: _bloc,
-              ) : const SizedBox.shrink(),
-              state.isFabVisible ? _BackFAB(
-                bloc: _bloc,
-              ) : const SizedBox.shrink(),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -227,20 +234,21 @@ class _DayRecord extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dayRecord = this.dayRecord;
-    final dayMemo = dayRecord.isToday ? dayRecord.dayMemo.buildNew(hint: AppLocalizations.of(context).dayMemoHint)
-      : dayRecord.dayMemo;
+    final dayMemo = dayRecord.isToday ? dayRecord.dayMemo.buildNew(hint: AppLocalizations.of(context).dayMemoHint) : dayRecord.dayMemo;
 
-    return dayRecord.toDoRecords.length == 0 ? _EmptyToDoListView(
-      bloc: bloc,
-      dayMemo: dayMemo,
-      focusNodeProvider: focusNodeProvider,
-    ) : _ToDoListView(
-      bloc: bloc,
-      dayMemo: dayMemo,
-      toDoRecords: dayRecord.toDoRecords,
-      scrollController: scrollController,
-      focusNodeProvider: focusNodeProvider,
-    );
+    return dayRecord.toDoRecords.length == 0
+        ? _EmptyToDoListView(
+            bloc: bloc,
+            dayMemo: dayMemo,
+            focusNodeProvider: focusNodeProvider,
+          )
+        : _ToDoListView(
+            bloc: bloc,
+            dayMemo: dayMemo,
+            toDoRecords: dayRecord.toDoRecords,
+            scrollController: scrollController,
+            focusNodeProvider: focusNodeProvider,
+          );
   }
 }
 
@@ -256,8 +264,12 @@ class _AddToDoFAB extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomRight,
       child: Padding(
-        padding: const EdgeInsets.only(right: 16, bottom: 16,),
+        padding: const EdgeInsets.only(
+          right: 16,
+          bottom: 16,
+        ),
         child: FloatingActionButton(
+          key: Key('addTodoBtn'),
           child: Image.asset('assets/ic_plus.png'),
           backgroundColor: AppColors.PRIMARY,
           splashColor: AppColors.PRIMARY_DARK,
@@ -280,8 +292,12 @@ class _BackFAB extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.only(left: 16, bottom: 16,),
+        padding: const EdgeInsets.only(
+          left: 16,
+          bottom: 16,
+        ),
         child: FloatingActionButton(
+          key: Key('dayBackButton'),
           heroTag: null,
           child: Image.asset('assets/ic_back_arrow.png'),
           backgroundColor: AppColors.BACKGROUND_WHITE,
@@ -305,8 +321,11 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: <Widget>[
-        SizedBox(width: 4,),
+        SizedBox(
+          width: 4,
+        ),
         InkWell(
+          key: Key('prevDayBtn'),
           onTap: () => bloc.onPrevArrowClicked(),
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -315,7 +334,9 @@ class _Header extends StatelessWidget {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14,),
+            padding: const EdgeInsets.symmetric(
+              vertical: 14,
+            ),
             child: Text(
               title,
               style: TextStyle(
@@ -328,13 +349,16 @@ class _Header extends StatelessWidget {
           ),
         ),
         InkWell(
+          key: Key('nextDayBtn'),
           onTap: () => bloc.onNextArrowClicked(),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Image.asset('assets/ic_next.png'),
           ),
         ),
-        SizedBox(width: 4,),
+        SizedBox(
+          width: 4,
+        ),
       ],
     );
   }
@@ -421,24 +445,26 @@ class _DayMemo extends StatelessWidget {
                 ),
               ),
             ),
-            isExpanded ? Padding(
-              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
-              child: SizedBox(
-                height: 97,
-                child: AppTextField(
-                  focusNode: focusNodeProvider(dayMemo.key),
-                  text: dayMemo.text,
-                  textSize: 14,
-                  textColor: AppColors.TEXT_WHITE,
-                  hintText: dayMemo.hint,
-                  hintTextSize: 14,
-                  hintColor: AppColors.TEXT_WHITE_DARK,
-                  onChanged: (s) => bloc.onDayMemoTextChanged(dayMemo, s),
-                  maxLines: null,
-                  cursorColor: AppColors.TEXT_WHITE,
-                ),
-              ),
-            ) : const SizedBox.shrink(),
+            isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
+                    child: SizedBox(
+                      height: 97,
+                      child: AppTextField(
+                        focusNode: focusNodeProvider(dayMemo.key),
+                        text: dayMemo.text,
+                        textSize: 14,
+                        textColor: AppColors.TEXT_WHITE,
+                        hintText: dayMemo.hint,
+                        hintTextSize: 14,
+                        hintColor: AppColors.TEXT_WHITE_DARK,
+                        onChanged: (s) => bloc.onDayMemoTextChanged(dayMemo, s),
+                        maxLines: null,
+                        cursorColor: AppColors.TEXT_WHITE,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
       ),
@@ -518,7 +544,9 @@ class _ToDoItem extends StatelessWidget {
         InkWell(
           child: Row(
             children: <Widget>[
-              SizedBox(width: 36,),
+              SizedBox(
+                width: 36,
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: _CategoryThumbnail(
@@ -530,75 +558,86 @@ class _ToDoItem extends StatelessWidget {
               ),
               SizedBox(width: 36),
               Expanded(
-                child: category.id == Category.ID_DEFAULT ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    toDo.text,
-                    style: toDo.isDone ? TextStyle(
-                      fontSize: 14,
-                      color: AppColors.TEXT_BLACK_LIGHT,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: AppColors.TEXT_BLACK_LIGHT,
-                      decorationThickness: 2,
-                    ) : TextStyle(
-                      fontSize: 14,
-                      color: AppColors.TEXT_BLACK,
-                    ),
-                  ),
-                ) : Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        toDo.text,
-                        style: toDo.isDone ? TextStyle(
-                          fontSize: 14,
-                          color: AppColors.TEXT_BLACK_LIGHT,
-                          decoration: TextDecoration.lineThrough,
-                          decorationColor: AppColors.TEXT_BLACK_LIGHT,
-                          decorationThickness: 2,
-                        ) : TextStyle(
-                          fontSize: 14,
-                          color: AppColors.TEXT_BLACK,
-                        ),
-                      ),
-                      SizedBox(height: 2,),
-                      Text(
-                        category.name,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.TEXT_BLACK_LIGHT,
+                child: category.id == Category.ID_DEFAULT
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Text(
+                          toDo.text,
+                          style: toDo.isDone
+                              ? TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.TEXT_BLACK_LIGHT,
+                                  decoration: TextDecoration.lineThrough,
+                                  decorationColor: AppColors.TEXT_BLACK_LIGHT,
+                                  decorationThickness: 2,
+                                )
+                              : TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.TEXT_BLACK,
+                                ),
                         ),
                       )
-                    ],
-                  ),
-                ),
-              ),
-              toDo.isDone ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 39),
-                child: Image.asset('assets/ic_check.png'),
-              ) : Padding(
-                padding: const EdgeInsets.only(right: 24),
-                child: InkWell(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 14, top: 14, right: 14, bottom: 14),
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: AppColors.TEXT_BLACK_LIGHT,
-                          width: 2,
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              toDo.text,
+                              style: toDo.isDone
+                                  ? TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.TEXT_BLACK_LIGHT,
+                                      decoration: TextDecoration.lineThrough,
+                                      decorationColor: AppColors.TEXT_BLACK_LIGHT,
+                                      decorationThickness: 2,
+                                    )
+                                  : TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.TEXT_BLACK,
+                                    ),
+                            ),
+                            SizedBox(
+                              height: 2,
+                            ),
+                            Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.TEXT_BLACK_LIGHT,
+                              ),
+                            )
+                          ],
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(2)),
+                      ),
+              ),
+              toDo.isDone
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 39),
+                      child: Image.asset('assets/ic_check.png'),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(right: 24),
+                      child: InkWell(
+                        key: Key('checkboxCompleteTask'),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 14, top: 14, right: 14, bottom: 14),
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: AppColors.TEXT_BLACK_LIGHT,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.all(Radius.circular(2)),
+                            ),
+                          ),
+                        ),
+                        customBorder: CircleBorder(),
+                        onTap: () => bloc.onToDoCheckBoxClicked(context, toDo),
                       ),
                     ),
-                  ),
-                  customBorder: CircleBorder(),
-                  onTap: () => bloc.onToDoCheckBoxClicked(context, toDo),
-                ),
-              ),
             ],
           ),
           onTap: () => bloc.onToDoRecordItemClicked(toDoRecord),
@@ -643,11 +682,7 @@ class _CategoryThumbnail extends StatelessWidget {
     final type = category.thumbnailType;
     switch (type) {
       case CategoryThumbnailType.IMAGE:
-        return _ImageCategoryThumbnail(
-          imagePath: category.imagePath,
-          width: width,
-          height: height
-        );
+        return _ImageCategoryThumbnail(imagePath: category.imagePath, width: width, height: height);
       default:
         return _ColorCategoryThumbnail(
           fillColor: category.fillColor,
@@ -666,11 +701,7 @@ class _ImageCategoryThumbnail extends StatelessWidget {
   final double width;
   final double height;
 
-  _ImageCategoryThumbnail({
-    @required this.imagePath,
-    @required this.width,
-    @required this.height
-  });
+  _ImageCategoryThumbnail({@required this.imagePath, @required this.width, @required this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -678,12 +709,11 @@ class _ImageCategoryThumbnail extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: FileImage(File(imagePath)),
-        )
-      ),
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: FileImage(File(imagePath)),
+          )),
     );
   }
 }
@@ -711,16 +741,18 @@ class _ColorCategoryThumbnail extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      decoration: isFill ? BoxDecoration(
-        shape: BoxShape.circle,
-        color: fillColor,
-      ) : BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: borderColor,
-          width: 2,
-        ),
-      ),
+      decoration: isFill
+          ? BoxDecoration(
+              shape: BoxShape.circle,
+              color: fillColor,
+            )
+          : BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: borderColor,
+                width: 2,
+              ),
+            ),
       child: Center(
         child: Text(
           initial,
@@ -757,12 +789,8 @@ class _ToDoEditorContainer extends StatelessWidget {
             width: double.infinity,
             height: 6,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)]
-              )
-            ),
+                gradient: LinearGradient(
+                    begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)])),
           ),
           Container(
             width: double.infinity,
@@ -779,7 +807,9 @@ class _ToDoEditorContainer extends StatelessWidget {
                   editingToDoRecord: editingToDoRecord,
                   focusNodeProvider: focusNodeProvider,
                 ),
-                SizedBox(height: 2,),
+                SizedBox(
+                  height: 2,
+                ),
                 Row(
                   children: <Widget>[
                     _ToDoEditorCategoryButton(
@@ -788,12 +818,17 @@ class _ToDoEditorContainer extends StatelessWidget {
                     ),
                     Spacer(),
                     Padding(
-                      padding: const EdgeInsets.only(right: 10,),
+                      padding: const EdgeInsets.only(
+                        right: 10,
+                      ),
                       child: Material(
                         type: MaterialType.transparency,
                         child: InkWell(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14,),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 4,
+                              horizontal: 14,
+                            ),
                             child: Text(
                               AppLocalizations.of(context).cancel,
                               style: TextStyle(
@@ -828,7 +863,7 @@ class _ToDoEditor extends StatelessWidget {
     @required this.bloc,
     @required this.editingToDoRecord,
     @required FocusNode Function(String key) focusNodeProvider,
-  }): _focusNode = focusNodeProvider(_focusNodeKey);
+  }) : _focusNode = focusNodeProvider(_focusNodeKey);
 
   @override
   StatelessElement createElement() {
@@ -843,7 +878,10 @@ class _ToDoEditor extends StatelessWidget {
     final category = editingToDoRecord.category;
     final toDo = editingToDoRecord.toDo;
     return Padding(
-      padding: const EdgeInsets.only(left: 24, top: 10,),
+      padding: const EdgeInsets.only(
+        left: 24,
+        top: 10,
+      ),
       child: Row(
         children: <Widget>[
           _CategoryThumbnail(
@@ -854,7 +892,11 @@ class _ToDoEditor extends StatelessWidget {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4,),
+              padding: const EdgeInsets.only(
+                left: 14,
+                top: 4,
+                bottom: 4,
+              ),
               child: AppTextField(
                 focusNode: _focusNode,
                 text: toDo.text,
@@ -869,12 +911,17 @@ class _ToDoEditor extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 10,),
+            padding: const EdgeInsets.only(
+              right: 10,
+            ),
             child: Material(
               type: MaterialType.transparency,
               child: InkWell(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14,),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 14,
+                  ),
                   child: Text(
                     editingToDoRecord.isDraft ? AppLocalizations.of(context).add : AppLocalizations.of(context).modify,
                     style: TextStyle(
@@ -920,7 +967,7 @@ class _ToDoEditorCategoryButton extends StatelessWidget {
           ),
           child: Text(
             '${AppLocalizations.of(context).category}: '
-              '${categoryName.isEmpty ? AppLocalizations.of(context).categoryNone : categoryName}',
+            '${categoryName.isEmpty ? AppLocalizations.of(context).categoryNone : categoryName}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -959,77 +1006,87 @@ class _CategoryEditorContainer extends StatelessWidget {
           color: AppColors.SCRIM,
         ),
         Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            color: AppColors.BACKGROUND_WHITE,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _CategoryEditorCategoryList(
-                  bloc: bloc,
-                  allCategories: allCategories,
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 1,
-                  color: AppColors.DIVIDER_DARK,
-                ),
-                Column(
-                  children: <Widget>[
-                    _CategoryEditor(
-                      bloc: bloc,
-                      category: editingCategory,
-                      focusNodeProvider: focusNodeProvider,
-                    ),
-                    SizedBox(height: 2,),
-                    Row(
-                      children: <Widget>[
-                        _ChoosePhotoButton(
-                          bloc: bloc,
-                        ),
-                        SizedBox(width: 10,),
-                        Expanded(
-                          child: SizedBox(
-                            height: 28,
-                            child: ListView.builder(
-                              itemCount: categoryPickers.length,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                final categoryPicker = categoryPickers[index];
-                                return _CategoryPickerItem(
-                                  bloc: bloc,
-                                  item: categoryPicker,
-                                  isSelected: index == selectedPickerIndex,
-                                );
-                              },
-                            ),
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              color: AppColors.BACKGROUND_WHITE,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _CategoryEditorCategoryList(
+                    bloc: bloc,
+                    allCategories: allCategories,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 1,
+                    color: AppColors.DIVIDER_DARK,
+                  ),
+                  Column(
+                    children: <Widget>[
+                      _CategoryEditor(
+                        bloc: bloc,
+                        category: editingCategory,
+                        focusNodeProvider: focusNodeProvider,
+                      ),
+                      SizedBox(
+                        height: 2,
+                      ),
+                      Row(
+                        children: <Widget>[
+                          _ChoosePhotoButton(
+                            bloc: bloc,
                           ),
-                        ),
-                        SizedBox(width: 3,),
-                        Material(
-                          child: InkWell(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 14,),
-                              child: Text(
-                                AppLocalizations.of(context).cancel,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.SECONDARY,
-                                ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: SizedBox(
+                              height: 28,
+                              child: ListView.builder(
+                                itemCount: categoryPickers.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  final categoryPicker = categoryPickers[index];
+                                  return _CategoryPickerItem(
+                                    bloc: bloc,
+                                    item: categoryPicker,
+                                    isSelected: index == selectedPickerIndex,
+                                  );
+                                },
                               ),
                             ),
-                            onTap: () => bloc.onCategoryEditorCancelClicked(),
                           ),
-                        ),
-                        SizedBox(width: 10,),
-                      ],
-                    ),
-                  ],
-                )
-              ],
-            ),
-          )
-        ),
+                          SizedBox(
+                            width: 3,
+                          ),
+                          Material(
+                            child: InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                  horizontal: 14,
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context).cancel,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: AppColors.SECONDARY,
+                                  ),
+                                ),
+                              ),
+                              onTap: () => bloc.onCategoryEditorCancelClicked(),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            )),
       ],
     );
   }
@@ -1084,20 +1141,22 @@ class _CategoryListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        isFirst ? SizedBox(height: 4,) : Container(),
+        isFirst
+            ? SizedBox(
+                height: 4,
+              )
+            : Container(),
         InkWell(
           onTap: () => bloc.onCategoryEditorCategoryClicked(category),
           onLongPress: () => bloc.onCategoryEditorCategoryLongClicked(context, category),
           child: Row(
             children: <Widget>[
-              SizedBox(width: 18,),
+              SizedBox(
+                width: 18,
+              ),
               Padding(
                 padding: const EdgeInsets.all(6),
-                child: _CategoryThumbnail(
-                  category: category,
-                  width: 24,
-                  height: 24,
-                  fontSize: 14),
+                child: _CategoryThumbnail(category: category, width: 24, height: 24, fontSize: 14),
               ),
               Expanded(
                 child: Padding(
@@ -1111,7 +1170,9 @@ class _CategoryListItem extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 24,),
+              SizedBox(
+                width: 24,
+              ),
             ],
           ),
         ),
@@ -1123,7 +1184,11 @@ class _CategoryListItem extends StatelessWidget {
             color: AppColors.DIVIDER,
           ),
         ),
-        isLast ? SizedBox(height: 4,) : const SizedBox.shrink(),
+        isLast
+            ? SizedBox(
+                height: 4,
+              )
+            : const SizedBox.shrink(),
       ],
     );
   }
@@ -1140,7 +1205,7 @@ class _CategoryEditor extends StatelessWidget {
     @required this.bloc,
     @required this.category,
     @required FocusNode Function(String key) focusNodeProvider,
-  }): _focusNode = focusNodeProvider(_focusNodeKey);
+  }) : _focusNode = focusNodeProvider(_focusNodeKey);
 
   @override
   StatelessElement createElement() {
@@ -1155,20 +1220,22 @@ class _CategoryEditor extends StatelessWidget {
     final addButtonEnabled = category.name.length > 0;
     final modifyButtonEnabled = category.id != Category.ID_DEFAULT && category.name.length > 0;
     return Padding(
-      padding: const EdgeInsets.only(left: 24, top: 10,),
+      padding: const EdgeInsets.only(
+        left: 24,
+        top: 10,
+      ),
       child: Material(
         type: MaterialType.transparency,
         child: Row(
           children: <Widget>[
-            _CategoryThumbnail(
-              category: category,
-              width: 24,
-              height: 24,
-              fontSize: 14
-            ),
+            _CategoryThumbnail(category: category, width: 24, height: 24, fontSize: 14),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 14, top: 4, bottom: 4,),
+                padding: const EdgeInsets.only(
+                  left: 14,
+                  top: 4,
+                  bottom: 4,
+                ),
                 child: AppTextField(
                   focusNode: _focusNode,
                   text: category.name,
@@ -1184,7 +1251,10 @@ class _CategoryEditor extends StatelessWidget {
             InkWell(
               onTap: addButtonEnabled ? bloc.onCreateNewCategoryClicked : null,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 9,),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 9,
+                ),
                 child: Text(
                   AppLocalizations.of(context).create,
                   style: TextStyle(
@@ -1200,7 +1270,10 @@ class _CategoryEditor extends StatelessWidget {
             InkWell(
               onTap: modifyButtonEnabled ? bloc.onModifyCategoryClicked : null,
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 9,),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 9,
+                ),
                 child: Text(
                   AppLocalizations.of(context).modify,
                   style: TextStyle(
@@ -1213,7 +1286,9 @@ class _CategoryEditor extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 15,),
+            SizedBox(
+              width: 15,
+            ),
           ],
         ),
       ),
@@ -1231,7 +1306,11 @@ class _ChoosePhotoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 24, top: 10, bottom: 10,),
+      padding: const EdgeInsets.only(
+        left: 24,
+        top: 10,
+        bottom: 10,
+      ),
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () => bloc.onChoosePhotoClicked(),
@@ -1276,16 +1355,18 @@ class _CategoryPickerItem extends StatelessWidget {
         child: Container(
           width: 24,
           height: 24,
-          decoration: item.isFillType ? BoxDecoration(
-            shape: BoxShape.circle,
-            color: item.color,
-          ) : BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: item.color,
-              width: 2,
-            ),
-          ),
+          decoration: item.isFillType
+              ? BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: item.color,
+                )
+              : BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: item.color,
+                    width: 2,
+                  ),
+                ),
           child: isSelected ? Image.asset(checkAssetName) : const SizedBox.shrink(),
         ),
       ),
@@ -1299,7 +1380,7 @@ class _HeaderShadow extends StatefulWidget {
   _HeaderShadow({
     Key key,
     @required this.scrollController,
-  }): super(key: key);
+  }) : super(key: key);
 
   @override
   State createState() => _HeaderShadowState();
@@ -1340,12 +1421,8 @@ class _HeaderShadowState extends State<_HeaderShadow> {
       width: double.infinity,
       height: _isShadowVisible ? 6 : 0,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)]
-        )
-      ),
+          gradient: LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)])),
     );
   }
 }
