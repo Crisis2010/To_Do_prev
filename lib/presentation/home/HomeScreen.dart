@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:todo_app/AppColors.dart';
@@ -18,8 +17,7 @@ class HomeScreen extends StatefulWidget {
   }
 }
 
-class _HomeScreenState extends State<HomeScreen> implements WeekBlocDelegator,
-  SettingsBlocDelegator {
+class _HomeScreenState extends State<HomeScreen> implements WeekBlocDelegator, SettingsBlocDelegator {
   HomeBloc _bloc;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -32,12 +30,11 @@ class _HomeScreenState extends State<HomeScreen> implements WeekBlocDelegator,
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      initialData: _bloc.getInitialState(),
-      stream: _bloc.observeState(),
-      builder: (context, snapshot) {
-        return _buildUI(snapshot.data);
-      }
-    );
+        initialData: _bloc.getInitialState(),
+        stream: _bloc.observeState(),
+        builder: (context, snapshot) {
+          return _buildUI(snapshot.data);
+        });
   }
 
   @override
@@ -66,12 +63,10 @@ class _HomeScreenState extends State<HomeScreen> implements WeekBlocDelegator,
                       width: double.infinity,
                       height: 6,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)]
-                        )
-                      ),
+                          gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [AppColors.DIVIDER, AppColors.DIVIDER.withAlpha(0)])),
                     ),
                   ),
                 ],
@@ -88,9 +83,7 @@ class _HomeScreenState extends State<HomeScreen> implements WeekBlocDelegator,
   }
 
   @override
-  void showBottomSheet(void Function(BuildContext) builder, {
-    void Function() onClosed
-  }) {
+  void showBottomSheet(void Function(BuildContext) builder, {void Function() onClosed}) {
     Utils.showBottomSheet(_scaffoldKey.currentState, builder, onClosed: onClosed);
   }
 
@@ -150,22 +143,21 @@ class _BottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        constraints: BoxConstraints(
-          minHeight: 55,
-        ),
-        color: AppColors.BACKGROUND_WHITE,
-        child: Row(
-          children: List.generate(childScreenItems.length, (index) {
-            return _BottomNavigationItem(
-              bloc: bloc,
-              item: childScreenItems[index],
-            );
-          }),
-        ),
-      )
-    );
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: 55,
+          ),
+          color: AppColors.BACKGROUND_WHITE,
+          child: Row(
+            children: List.generate(childScreenItems.length, (index) {
+              return _BottomNavigationItem(
+                bloc: bloc,
+                item: childScreenItems[index],
+              );
+            }),
+          ),
+        ));
   }
 }
 
@@ -180,8 +172,9 @@ class _BottomNavigationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = item.key == HomeChildScreenItem.KEY_RECORD ? AppLocalizations.of(context).recordNavigationTitle
-      : AppLocalizations.of(context).settingsNavigationTitle;
+    final title = item.key == HomeChildScreenItem.KEY_RECORD
+        ? AppLocalizations.of(context).recordNavigationTitle
+        : AppLocalizations.of(context).settingsNavigationTitle;
     return Expanded(
       child: Material(
         child: InkWell(
