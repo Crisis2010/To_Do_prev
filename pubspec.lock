@@ -264,6 +264,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.3"
+  package_resolver:
+    dependency: transitive
+    description:
+      name: package_resolver
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.10"
   path:
     dependency: "direct main"
     description:
@@ -354,7 +361,7 @@ packages:
       name: shelf_packages_handler
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "1.0.4"
   shelf_static:
     dependency: transitive
     description:
@@ -450,7 +457,7 @@ packages:
       name: test
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.14.3"
+    version: "1.14.4"
   test_api:
     dependency: transitive
     description:
@@ -485,14 +492,14 @@ packages:
       name: vibration
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.2"
+    version: "1.2.4"
   vm_service:
     dependency: transitive
     description:
       name: vm_service
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.4"
+    version: "2.3.1"
   vm_service_client:
     dependency: transitive
     description:
@@ -527,7 +534,7 @@ packages:
       name: webkit_inspection_protocol
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.4"
+    version: "0.7.1"
   xml:
     dependency: transitive
     description:
