@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:todo_app/AppColors.dart';
@@ -24,16 +23,16 @@ class _LockScreenState extends State<LockScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      initialData: _bloc.getInitialState(),
-      stream: _bloc.observeState(),
-      builder: (context, snapshot) {
-        return _buildUI(snapshot.data);
-      }
-    );
+        initialData: _bloc.getInitialState(),
+        stream: _bloc.observeState(),
+        builder: (context, snapshot) {
+          return _buildUI(snapshot.data);
+        });
   }
 
   Widget _buildUI(LockState state) {
-    final errorMsg = state.failCount > 0 ? '${AppLocalizations.of(context).confirmPasswordFail} (${state.failCount}/${LockState.MAX_FAIL_COUNT})' : '';
+    final errorMsg =
+        state.failCount > 0 ? '${AppLocalizations.of(context).confirmPasswordFail} (${state.failCount}/${LockState.MAX_FAIL_COUNT})' : '';
     return WillPopScope(
       onWillPop: () async {
         SystemNavigator.pop();
@@ -49,16 +48,18 @@ class _LockScreenState extends State<LockScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Image.asset('assets/ic_lock_logo.png'),
-                      SizedBox(height: 16,),
+                      SizedBox(height: 16),
                       SizedBox(
                         height: 64,
-                        child: errorMsg.isNotEmpty ? Text(
-                          errorMsg,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.RED,
-                          ),
-                        ) : const SizedBox.shrink(),
+                        child: errorMsg.isNotEmpty
+                            ? Text(
+                                errorMsg,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.RED,
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                       _Passwords(
                         passwordLength: state.password.length,
@@ -70,7 +71,9 @@ class _LockScreenState extends State<LockScreen> {
               VirtualKeyboard(
                 onKeyPressed: (VirtualKeyboardKey key) => _bloc.onVirtualKeyPressed(context, key),
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
             ],
           ),
         ),
@@ -94,14 +97,12 @@ class _Passwords extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: List.generate(4, (i) {
           return Padding(
-            padding: i > 0 ? const EdgeInsets.only(left: 33) : const EdgeInsets.all(0),
-            child: SizedBox(
-              width: 19,
-              child: Center(
-                child: i <= passwordLength - 1 ? Image.asset('assets/ic_password.png') : Image.asset('assets/ic_password_blank.png'),
-              )
-            )
-          );
+              padding: i > 0 ? const EdgeInsets.only(left: 33) : const EdgeInsets.all(0),
+              child: SizedBox(
+                  width: 19,
+                  child: Center(
+                    child: i <= passwordLength - 1 ? Image.asset('assets/ic_password.png') : Image.asset('assets/ic_password_blank.png'),
+                  )));
         }),
       ),
     );
